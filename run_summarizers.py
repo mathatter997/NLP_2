@@ -15,7 +15,7 @@ models = [LogisticSummarizer(theta_length=2, wv_size=50),
           RandomSummarizer(), 
           HackSummarizer()]
 
-model_names = ['logistic', 'mlp_sigmoid', 'mlp_relu', 'random', 'hack'][0:1]
+model_names = ['logistic', 'mlp_sigmoid', 'mlp_relu', 'random', 'hack']
 
 validation_set = 'data/validation.json'
 test_set = 'data/test.json' 

@@ -28,4 +28,5 @@ preprocessed_eval_articles = model.preprocess(eval_articles)
 summaries = model.predict(preprocessed_eval_articles)
 eval_out_data = [{'article': article, 'summary': summary} for article, summary in zip(eval_articles, summaries)]
 
-print(json.dumps(eval_out_data, indent=4))
+with open('data/output.json', 'w') as f:
+    json.dump(eval_out_data, f)

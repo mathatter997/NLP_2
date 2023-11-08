@@ -4,30 +4,50 @@ import json
 import tqdm
 
 args = argparse.ArgumentParser()
-args.add_argument('--pred_data', type=str, default='data/validation.json')
-args.add_argument('--eval_data', type=str, default='data/validation.json')
-args = args.parse_args()
+# args.add_argument('--pred_data', type=str, default='data/validation.json')
+# args.add_argument('--eval_data', type=str, default='data/validation.json')
+# args = args.parse_args()
 
 evaluator = RougeEvaluator()
 
-with open(args.eval_data, 'r') as f:
-    eval_data = json.load(f)
+pred_files = ['data/logistic_test_output.json',
+              'data/mlp_sigmoid_test_output.json',
+              'data/mlp_relu_test_output.json', 
+              'data/random_test_output.json',
+              'data/hack_test_output.json']
 
-with open(args.pred_data, 'r') as f:
-    pred_data = json.load(f)
+names = ['logistic', 'mlp_sigmoid', 'mlp_relu', 'random', 'hack']
+eval_file = 'data/test.json'
 
-assert len(eval_data) == len(pred_data)
 
-pred_sums = []
-eval_sums = []
-for eval, pred in tqdm.tqdm(zip(eval_data, pred_data), total=len(eval_data)):
-    pred_sums.append(pred['summary'])
-    eval_sums.append(eval['summary'])
+model_scores = [[] for _ in range(len(names))]
+for i, pred_file in enumerate(pred_files):
+    with open(eval_file, 'r') as f:
+        eval_data = json.load(f)
+    with open(pred_file, 'r') as f:
+        pred_data = json.load(f)
 
-scores = evaluator.batch_score(pred_sums, eval_sums)
+    assert len(eval_data) == len(pred_data)
 
-for k, v in scores.items():
-    print(k)
-    print("\tPrecision:\t", v["p"])
-    print("\tRecall:\t\t", v["r"])
-    print("\tF1:\t\t", v["f"])
+    pred_sums = []
+    eval_sums = []
+    for eval, pred in tqdm.tqdm(zip(eval_data, pred_data), total=len(eval_data)):
+        pred_sums.append(pred['summary'])
+        eval_sums.append(eval['summary'])
+
+    scores = evaluator.batch_score(pred_sums, eval_sums)
+
+    for k, v in scores.items():
+        val = "{:.3f}/{:.3f}/{:.3f}".format(v["p"], v["r"], v["f"])
+        model_scores[i].append(val)
+
+metrics = ['ROUGE-1', 'ROUGE-2', 'ROUGE-4', 'ROUGE-l']
+table_name = '\t' + '\t\t'.join(names)
+print(table_name)
+for k, metric in enumerate(metrics):
+    print('{}: '.format(metric), end = ' & ')
+    for i, model in enumerate(names):
+        print(model_scores[i][k], end = ' & ')
+    print()
+
+
